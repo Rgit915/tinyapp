@@ -10,6 +10,17 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//function to generate a random short URL ID
+function generateRandomString() {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgjiklmnopqrstuvwxyz0123456789';
+  randomString ='';
+  for(let i = 0; i < 6; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    randomString += characters.charAt(randomIndex);
+  }
+  return randomString;
+}
+
 //Middlware to parse URL-encoded data
 app.use(express.urlencoded({ extended: true }));
 
