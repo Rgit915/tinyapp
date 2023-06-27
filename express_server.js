@@ -58,6 +58,16 @@ app.get("/urls/:id", (req, res) =>{
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  const { id } = req.params;
+  const longURL = urlDatabase[id];
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("Short URL not found");
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
