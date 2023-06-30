@@ -72,7 +72,7 @@ app.post("/urls/:id/delete",(req, res) => {
   const { id } = req.params;
   delete urlDatabase[id];
   res.redirect("/urls");
-})
+});
 
 app.post("/urls/:id", (req, res) =>{
   const id = req.params.id;
@@ -82,6 +82,14 @@ app.post("/urls/:id", (req, res) =>{
     urlDatabase[id] = newLongURL;
   
   res.redirect("/urls");
+});
+
+app.post("/login",(req, res) => {
+  const { username } = req.body;
+  console.log(req.body); // Log the POST request body to the console
+  
+  res.cookie("username", username); // Set the cookie named "username" with the submitted value
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
