@@ -19,9 +19,9 @@
       </div>
     </div>
     <!------check if the username present------>
-    <% if (username) { %>
+    <% if (user) { %>
       Logged in as: <%=
-    username %>
+    user.email %>
     <form class="form-inline" action="/logout" method="POST">
       <div class="form-group mb-2">
         
