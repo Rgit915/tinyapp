@@ -22,9 +22,15 @@
     <% if (username) { %>
       Logged in as: <%=
     username %>
-    <% } %>
+    <form class="form-inline" action="/logout" method="POST">
+      <div class="form-group mb-2">
+        
+        <button type="submit" class="btn btn-outline-dark">logout</button>
+      </div>
+    </form>
+    <% }  else { %>
 
-    <form class="form-inline" action="/login" method="POST">
+    <form class="form-inline" action="/Login" method="POST">
       <div class="form-group mb-2">
         
         <input
@@ -38,5 +44,6 @@
         <button type="submit" class="btn btn-outline-dark">Login</button>
       </div>
     </form>
+  <% } %>  
   </nav>
 </header>
