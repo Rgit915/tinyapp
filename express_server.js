@@ -5,8 +5,21 @@ const PORT = 8080; //default port 8080
 
 //set ejs as view engine
 app.set("view engine", "ejs");
-
 app.use(cookieParser());
+
+//Database
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -111,6 +124,21 @@ app.post("/logout", (req, res) => {
 app.get("/register", (req, res) => {
   res.render("register");
 });
+
+app.post("/register", (req, res) =>{
+  const {email, password} = req.body
+  const userId = generateRandomString();
+  users[userId] = {
+    id: userId,
+    email,
+    password
+  };
+
+  console.log(req.body);
+  res.cookie('user_id', userId);
+  res.redirect('/urls');
+});
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
