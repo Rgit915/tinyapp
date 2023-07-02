@@ -1,13 +1,17 @@
 const express = require("express");
 const morgan = require("morgan");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 
 const app = express();
 const PORT = 8080;
 
 app.use(morgan("dev"));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: "session",
+  keys: ["supersecretKey", "anotherSuperSecretKet","df1718d9-9064-436d-bf71-f52fc9b7ee48"],
+  maxAge: 24 * 60 * 60 * 1000 //Cookie will expire in 24 hours
+}));
 app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
@@ -52,15 +56,7 @@ function generateRandomString() {
   return randomString;
 }
 
-//Email lookup helper function
-const getUserByEmail = (email, users) => {
-  for (const id in users) {
-    if (users[id].email === email) {
-      return users[id];
-    }
-  }
-  return null;
-};
+
 
 //function that filters the URLs in the urlDatabase based on logged userID
 const urlsForUser = (id) => {
@@ -103,7 +99,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user = users[req.cookies.user_id];// Retrieve the user object using user_id cookie value
+  const user = users[req.session.user_id];// Retrieve the user object using user_id cookie value
 
   if (!user) {
     res.send('<h1>Please log in or register to view URLs</h1><a class="nav-item nav-link" href="/login">Login</a>');
@@ -119,7 +115,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
 
   if (!user) {
     res.redirect('/login');
@@ -128,8 +124,48 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+
+app.post("/urls/:id/delete", (req, res) => {
+  const user = users[req.session.user_id];
+  const url = urlDatabase[req.params.id];
+
+  if (!url) {
+    res.status(404).send('<h1>URL not found</h1>');
+  } else if (!user) {
+    res.status(401).send('<h1>Please log in or register to delete URLs</h1>');
+  } else if (url.userID !== user.id) {
+    res.status(403).send('<h1>You do not have permission to delete this URL</h1>');
+  } else {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+  }
+});
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const foundUser = getUserByEmail(email, users);
+
+  if (!foundUser) {
+    return res.status(403).send("Invalid Email or Password");
+  }
+ 
+  const isPasswordCorrect = bcrypt.compareSync(password, foundUser.password);
+  if (!isPasswordCorrect) {
+    return res.status(403).send("Invalid Email or Password");
+  }
+
+  req.session.user_id = foundUser.id;
+  res.redirect('/urls');
+});
+
+app.post("/logout", (req, res) => {
+  req.session.user_id = null; // Clear the user_id in the session
+  res.redirect("/login");
+});
+
 app.post("/urls", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   if (!user) {
     res.status(403).send('You need to be logged in to shorten URLs.<a class="nav-item nav-link" href="/login">Login</a>');
   } else {
@@ -147,7 +183,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const user = users[req.cookies.user_id];
+  const user = users[req.session.user_id];
   const url = urlDatabase[req.params.id];
 
   if (!url) {
@@ -176,22 +212,6 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
-app.post("/urls/:id/delete", (req, res) => {
-  const user = users[req.cookies.user_id];
-  const url = urlDatabase[req.params.id];
-
-  if (!url) {
-    res.status(404).send('<h1>URL not found</h1>');
-  } else if (!user) {
-    res.status(401).send('<h1>Please log in or register to delete URLs</h1>');
-  } else if (url.userID !== user.id) {
-    res.status(403).send('<h1>You do not have permission to delete this URL</h1>');
-  } else {
-    delete urlDatabase[req.params.id];
-    res.redirect("/urls");
-  }
-});
-
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   const newLongURL = req.body.longURL;
@@ -202,28 +222,6 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/login", (req, res) => {
-  const { email, password } = req.body;
-
-  const foundUser = getUserByEmail(email, users);
-
-  if (!foundUser) {
-    return res.status(403).send("Invalid Email or Password");
-  }
- 
-  const isPasswordCorrect = bcrypt.compareSync(password, foundUser.password);
-  if (!isPasswordCorrect) {
-    return res.status(403).send("Invalid Email or Password");
-  }
-
-  res.cookie("user_id", foundUser.id);
-  res.redirect('/urls');
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect("/login");
-});
 
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
@@ -251,7 +249,7 @@ app.post("/register", (req, res) => {
     password: hashedPassword
   };
 
-  res.cookie('user_id', userId);
+  req.session.user_id = userId;
   res.redirect('/urls');
 });
 
