@@ -22,6 +22,11 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  myTestID: {
+    id: "myTestID",
+    email: "myTestEmail@myTinyApp.ca",
+    password: "tiny-app",
+  },
 };
 
 const urlDatabase = {
@@ -56,6 +61,18 @@ const getUserByEmail = (email, users) => {
   return null;
 };
 
+//function that filters the URLs in the urlDatabase based on logged userID
+const urlsForUser = (id) => {
+  const filteredUrls = {};
+  for (const url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      filteredUrls[url] = urlDatabase[url];
+    }
+  }
+  return filteredUrls;
+};
+
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -85,13 +102,16 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies.user_id] // Retrieve the user object using user_id cookie value
-  };
-  if(!templateVars.user) {
-    res.send('<h1>Please log in or register to view URLs</h1>');
+  const user = users[req.cookies.user_id];// Retrieve the user object using user_id cookie value
+  
+  if(!user) {
+    res.send('<h1>Please log in or register to view URLs</h1><a class="nav-item nav-link" href="/login">Login</a>');
   } else {
+    const filteredUrls = urlsForUser(user.id);
+    const templateVars = {
+      urls: filteredUrls,
+      user: user
+    };
     res.render("urls_index", templateVars);
   }
  
@@ -108,24 +128,39 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  if (!req.user) { 
-    res.status(403).send('You need to be logged in to shorten URLs.');
+  const user = users[req.cookies.user_id];
+  if (!user) { 
+    res.status(403).send('You need to be logged in to shorten URLs.<a class="nav-item nav-link" href="/login">Login</a>');
   } else {
   const { longURL } = req.body;
-  let randomID = generateRandomString();
-  urlDatabase[randomID] = longURL;   //save longURL & randomID(shortURL) to urlDatabase
-  res.redirect(`/urls/${randomID}`);  //update the redirection URL
+  const shortURL = generateRandomString();
+
+//Associate the userID with the created URL in urlDatabase
+  urlDatabase[shortURL] = {
+    longURL: longURL,
+    userID: user.id 
+  };
+
+  res.redirect(`/urls/${shortURL}`);  
   }
 });
 
 app.get("/urls/:id", (req, res) => {
-  const id = req.params.id;
-  const templateVars = {
-    id: id,
-    longURL: urlDatabase[id].longURL,
-    user: users[req.cookies.user_id]
-  };
-  res.render("urls_show", templateVars);
+  const user = users[req.cookies.user_id];
+  const url = urlDatabase[req.params.id];
+  
+  if (!user) {
+    res.status(401).send('<h1>Please log in or register to view this URL</h1><a href="/login">Login</a><br/><br/><a href="/register">Register</a><br/>');
+  } else if (!url || url.userID !== user.id) {
+    res.status(403).send('<h1>You do not have permission to access this URL</h1>');
+  } else {
+    const templateVars = {
+      id: req.params.id,
+      longURL: url.longURL,
+      user: user
+    };
+   res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/u/:id", (req, res) => {
