@@ -3,13 +3,13 @@ const morgan = require("morgan");
 const cookieParser = require('cookie-parser');
 
 const app = express();
-const PORT = 8080; 
+const PORT = 8080;
 
 app.use(morgan("dev"));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true })); 
+app.use(express.urlencoded({ extended: true }));
 
-app.set("view engine", "ejs"); 
+app.set("view engine", "ejs");
 
 const users = {
   userRandomID: {
@@ -78,7 +78,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if(req.user) {
+  if (req.user) {
     res.redirect('/urls');
   } else {
     res.render("login");
@@ -86,7 +86,7 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if(req.user) {
+  if (req.user) {
     res.redirect('/urls');
   } else {
     res.render("register");
@@ -103,8 +103,8 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const user = users[req.cookies.user_id];// Retrieve the user object using user_id cookie value
-  
-  if(!user) {
+
+  if (!user) {
     res.send('<h1>Please log in or register to view URLs</h1><a class="nav-item nav-link" href="/login">Login</a>');
   } else {
     const filteredUrls = urlsForUser(user.id);
@@ -114,7 +114,7 @@ app.get("/urls", (req, res) => {
     };
     res.render("urls_index", templateVars);
   }
- 
+
 });
 
 app.get("/urls/new", (req, res) => {
@@ -123,33 +123,35 @@ app.get("/urls/new", (req, res) => {
   if (!user) {
     res.redirect('/login');
   } else {
-  res.render("urls_new", { user });
+    res.render("urls_new", { user });
   }
 });
 
 app.post("/urls", (req, res) => {
   const user = users[req.cookies.user_id];
-  if (!user) { 
+  if (!user) {
     res.status(403).send('You need to be logged in to shorten URLs.<a class="nav-item nav-link" href="/login">Login</a>');
   } else {
-  const { longURL } = req.body;
-  const shortURL = generateRandomString();
+    const { longURL } = req.body;
+    const shortURL = generateRandomString();
 
-//Associate the userID with the created URL in urlDatabase
-  urlDatabase[shortURL] = {
-    longURL: longURL,
-    userID: user.id 
-  };
+    //Associate the userID with the created URL in urlDatabase
+    urlDatabase[shortURL] = {
+      longURL: longURL,
+      userID: user.id
+    };
 
-  res.redirect(`/urls/${shortURL}`);  
+    res.redirect(`/urls/${shortURL}`);
   }
 });
 
 app.get("/urls/:id", (req, res) => {
   const user = users[req.cookies.user_id];
   const url = urlDatabase[req.params.id];
-  
-  if (!user) {
+
+  if (!url) {
+    res.status(404).send('<h1>URL not found</h1>');
+  } else if (!user) {
     res.status(401).send('<h1>Please log in or register to view this URL</h1><a href="/login">Login</a><br/><br/><a href="/register">Register</a><br/>');
   } else if (!url || url.userID !== user.id) {
     res.status(403).send('<h1>You do not have permission to access this URL</h1>');
@@ -159,7 +161,7 @@ app.get("/urls/:id", (req, res) => {
       longURL: url.longURL,
       user: user
     };
-   res.render("urls_show", templateVars);
+    res.render("urls_show", templateVars);
   }
 });
 
@@ -174,14 +176,24 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const { id } = req.params;
-  delete urlDatabase[id];
-  res.redirect("/urls");
+  const user = users[req.cookies.user_id];
+  const url = urlDatabase[req.params.id];
+
+  if (!url) {
+    res.status(404).send('<h1>URL not found</h1>');
+  } else if (!user) {
+    res.status(401).send('<h1>Please log in or register to delete URLs</h1>');
+  } else if (url.userID !== user.id) {
+    res.status(403).send('<h1>You do not have permission to delete this URL</h1>');
+  } else {
+    delete urlDatabase[req.params.id];
+    res.redirect("/urls");
+  }
 });
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const newLongURL = req.body.longURL; 
+  const newLongURL = req.body.longURL;
 
   //update the stored long URL based on the new value
   urlDatabase[id].longURL = newLongURL;
@@ -202,7 +214,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid Email or Password");
   }
 
-  res.cookie("user_id", foundUser.id); 
+  res.cookie("user_id", foundUser.id);
   res.redirect('/urls');
 });
 
