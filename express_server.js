@@ -9,7 +9,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs"); 
 
-
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -51,6 +50,14 @@ const getUserByEmail = (email, users) => {
 
 app.get("/", (req, res) => {
   res.send("Hello!");
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.get("/register", (req, res) => {
+  res.render("register");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -109,16 +116,12 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const newLongURL = req.body.longURL; //retrieve the new long URL value from req.body.longURL
+  const newLongURL = req.body.longURL; 
 
   //update the stored long URL based on the new value
   urlDatabase[id] = newLongURL;
 
   res.redirect("/urls");
-});
-
-app.get("/login", (req, res) => {
-  res.render("login");
 });
 
 app.post("/login", (req, res) => {
@@ -134,17 +137,13 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid Email or Password");
   }
 
-  res.cookie("user_id", foundUser.id); // Set the cookie named "username" with the submitted value
+  res.cookie("user_id", foundUser.id); 
   res.redirect('/urls');
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/login");
-});
-
-app.get("/register", (req, res) => {
-  res.render("register");
 });
 
 app.post("/register", (req, res) => {
