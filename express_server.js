@@ -2,14 +2,14 @@ const express = require("express");
 const cookieParser = require('cookie-parser');
 
 const app = express();
-const PORT = 8080; //default port 8080
+const PORT = 8080; 
 
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true })); //Middlware to parse URL-encoded data
+app.use(express.urlencoded({ extended: true })); 
 
-app.set("view engine", "ejs"); //set ejs as view engine
+app.set("view engine", "ejs"); 
 
-//Database
+
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -117,15 +117,24 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/login", (req, res) =>{
+app.get("/login", (req, res) => {
   res.render("login");
 });
 
 app.post("/login", (req, res) => {
-  const { username } = req.body;
-  console.log(req.body); // Log the POST request body to the console
+  const { email, password } = req.body;
 
-  res.cookie("username", username); // Set the cookie named "username" with the submitted value
+  const foundUser = getUserByEmail(email, users);
+
+  if (!foundUser) {
+    return res.status(403).send("Invalid Email or Password");
+  }
+
+  if (foundUser.password !== password) {
+    return res.status(403).send("Invalid Email or Password");
+  }
+
+  res.cookie("user_id", foundUser.id); // Set the cookie named "username" with the submitted value
   res.redirect('/urls');
 });
 
@@ -142,7 +151,7 @@ app.post("/register", (req, res) => {
   const { email, password } = req.body;
 
   //check if email or password are empty strings
-  if(email === "" || password === "") {
+  if (email === "" || password === "") {
     return res.status(400).send("Email or password cannot be empty");
   }
 
