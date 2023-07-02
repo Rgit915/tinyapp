@@ -1,9 +1,11 @@
 const express = require("express");
+const morgan = require("morgan");
 const cookieParser = require('cookie-parser');
 
 const app = express();
 const PORT = 8080; 
 
+app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true })); 
 
@@ -23,8 +25,14 @@ const users = {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 //function to generate a random short URL ID
@@ -81,7 +89,12 @@ app.get("/urls", (req, res) => {
     urls: urlDatabase,
     user: users[req.cookies.user_id] // Retrieve the user object using user_id cookie value
   };
-  res.render("urls_index", templateVars);
+  if(!templateVars.user) {
+    res.send('<h1>Please log in or register to view URLs</h1>');
+  } else {
+    res.render("urls_index", templateVars);
+  }
+ 
 });
 
 app.get("/urls/new", (req, res) => {
@@ -106,9 +119,10 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  const id = req.params.id;
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    id: id,
+    longURL: urlDatabase[id].longURL,
     user: users[req.cookies.user_id]
   };
   res.render("urls_show", templateVars);
@@ -116,7 +130,7 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const { id } = req.params;
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
   if (longURL) {
     res.redirect(longURL);
   } else {
@@ -135,7 +149,7 @@ app.post("/urls/:id", (req, res) => {
   const newLongURL = req.body.longURL; 
 
   //update the stored long URL based on the new value
-  urlDatabase[id] = newLongURL;
+  urlDatabase[id].longURL = newLongURL;
 
   res.redirect("/urls");
 });
