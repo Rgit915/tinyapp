@@ -53,11 +53,19 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  if(req.user) {
+    res.redirect('/urls');
+  } else {
+    res.render("login");
+  }
 });
 
 app.get("/register", (req, res) => {
-  res.render("register");
+  if(req.user) {
+    res.redirect('/urls');
+  } else {
+    res.render("register");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
