@@ -210,8 +210,9 @@ app.post("/login", (req, res) => {
   if (!foundUser) {
     return res.status(403).send("Invalid Email or Password");
   }
-
-  if (foundUser.password !== password) {
+ 
+  const isPasswordCorrect = bcrypt.compareSync(password, foundUser.password);
+  if (!isPasswordCorrect) {
     return res.status(403).send("Invalid Email or Password");
   }
 
@@ -239,8 +240,8 @@ app.post("/register", (req, res) => {
   }
 
   //hash the password
-  const hashedPassword = bcrpt.hashSync(password, 10);
-
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  console.log(hashedPassword);
   // create a new user object with the hased password
   
   const userId = generateRandomString();
