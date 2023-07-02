@@ -86,15 +86,23 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user = users[req.cookies.user_id];
+
+  if (!user) {
+    res.redirect('/login');
+  } else {
   res.render("urls_new", { user });
+  }
 });
 
 app.post("/urls", (req, res) => {
+  if (!req.user) { 
+    res.status(403).send('You need to be logged in to shorten URLs.');
+  } else {
   const { longURL } = req.body;
-  console.log(req.body); // Log the POST request body to the console
   let randomID = generateRandomString();
   urlDatabase[randomID] = longURL;   //save longURL & randomID(shortURL) to urlDatabase
   res.redirect(`/urls/${randomID}`);  //update the redirection URL
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
