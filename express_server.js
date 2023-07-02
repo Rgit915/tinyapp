@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 
 const app = express();
 const PORT = 8080;
@@ -237,11 +238,16 @@ app.post("/register", (req, res) => {
     return res.status(400).send(`User with email ${email} already exists`);
   }
 
+  //hash the password
+  const hashedPassword = bcrpt.hashSync(password, 10);
+
+  // create a new user object with the hased password
+  
   const userId = generateRandomString();
   users[userId] = {
     id: userId,
     email,
-    password
+    password: hashedPassword
   };
 
   res.cookie('user_id', userId);
