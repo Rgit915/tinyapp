@@ -1,34 +1,3 @@
-// Example defined users and urlDatabase
-const users = {
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk",
-  },
-  myTestID: {
-    id: "myTestID",
-    email: "myTestEmail@myTinyApp.ca",
-    password: "tiny-app",
-  },
-};
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-
-
 //Email lookup helper function
 const getUserByEmail = (email, users) => {
   for (const id in users) {
@@ -52,7 +21,7 @@ const generateRandomString = () => {
 };
 
 //function that filters the URLs in the urlDatabase based on logged userID
-const urlsForUser = (id) => {
+const urlsForUser = (id, urlDatabase) => {
   const filteredUrls = {};
   for (const url in urlDatabase) {
     if (urlDatabase[url].userID === id) {
@@ -63,4 +32,4 @@ const urlsForUser = (id) => {
 };
 
 //Exports
-module.exports = { users, urlDatabase, getUserByEmail, generateRandomString, urlsForUser };
+module.exports = { getUserByEmail, generateRandomString, urlsForUser };
