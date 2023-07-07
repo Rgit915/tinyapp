@@ -3,8 +3,6 @@ const morgan = require("morgan");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const {
-  users,
-  urlDatabase,
   getUserByEmail,
   urlsForUser,
   generateRandomString,
@@ -24,6 +22,36 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
 
+// Example defined users and urlDatabase
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+  myTestID: {
+    id: "myTestID",
+    email: "myTestEmail@myTinyApp.ca",
+    password: "tiny-app",
+  },
+};
+
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
+};
+
 // GET /
 app.get('/', (req, res) => {
   const user = users[req.session.userId];
@@ -42,7 +70,7 @@ app.get("/urls", (req, res) => {
   if (!user) {
     res.render("home", { user });
   } else {
-    const filteredUrls = urlsForUser(user.id);
+    const filteredUrls = urlsForUser(user.id, urlDatabase);
     const templateVars = {
       urls: filteredUrls,
       user: user
@@ -214,7 +242,7 @@ app.post("/register", (req, res) => {
 
 // POST /logout
 app.post("/logout", (req, res) => {
-  req.session.userId = null; // Clear the userId in the session
+  req.session = null; // Clear the userId in the session
   res.redirect("/login");
 });
 
