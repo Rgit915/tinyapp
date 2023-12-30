@@ -10,11 +10,11 @@ These screenshoots represent key screens in TinyApp web application, providing a
 !["Screenshoot of main page showing user to register or login to shorten URLS"](https://github.com/Rgit915/tinyapp/blob/master/docs/mainPage.png?raw=true)
 - **Main page:** This page shows users the main features of TinyApp and provides them with clear instrucions to either register or log in to start using the URL shortening service.
 
-!["Screenshoot of the register Page showing user to create an account "](https://github.com/Rgit915/tinyapp/blob/master/docs/registerPage.png?raw=true)
+!["Screenshoot of the register Page showing user to create an account "](https://github.com/Rgit915/tinyapp/blob/master/docs/Register_form.png?raw=true)
 - **Register page:** This page provides a registration form where users can input thier email address and password. This is mainly for users who do not have an account yet.
 
 
-!["Screenshoot of the login Page "](https://github.com/Rgit915/tinyapp/blob/master/docs/loginPage.png?raw=true)
+!["Screenshoot of the login Page "](https://github.com/Rgit915/tinyapp/blob/master/docs/Login_form.png?raw=true)
 - **Login page:** For users who already have an account, the login section presents a login form with input fields for Email and password. Once users give valid credentials, the 'Login' button allows them to log in to their account.
 
 !["Screenshoot of List of URLS "](https://github.com/Rgit915/tinyapp/blob/master/docs/UsersURL.png?raw=true)
