@@ -30,14 +30,14 @@
           <% for (let id in urls) { %>
             <tr>
               <td>
-                <%= id %>
+               <a href="/u/<%= id %>" target="_blank"><%= id %></a>
               </td>
               <td>
                 <%= urls[id].longURL %>
               </td>
               <td>
 
-                <a href="/urls/<%= id %>" class="btn btn-outline-primary">Edit</a>
+                <a href="/urls/<%= id %>" class="btn btn-outline-success">Edit</a>
 
               </td>
               <td>
