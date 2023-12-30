@@ -19,14 +19,15 @@
         <a class="nav-item nav-link" href="/register">Register</a>
     </div>
     <% } else { %>
-      Logged in as: <%= user.email %>
-        <form class="form-inline" action="/logout" method="POST">
+      <div class="d-flex flex-row align-items-center">
+       <div>Logged in as: <%= user.email %></div>
+        <form class="form-inline mx-2" action="/logout" method="POST">
           <div class="form-group mb-2">
             <button type="submit" class="btn btn-outline-dark">Logout</button>
           </div>
         </form>
         <% } %>
-          </div>
+      </div>
   </nav>
 </header>
 
